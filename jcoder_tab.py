@@ -1,6 +1,31 @@
 import streamlit as st
-from helpers import ollama_prompt, run_python_code
+import requests
+from helpers import run_python_code
 import matplotlib.pyplot as plt
+
+# -------------------------------
+# Ollama via ngrok helper
+# -------------------------------
+def ollama_prompt_ngrok(prompt, model="llama3", temperature=0.7, max_tokens=512):
+    # IMPORTANT: replace with your actual ngrok forwarding URL
+    url = "https://YOUR-NGROK-URL.ngrok-free.dev/api/generate"
+    payload = {
+        "model": model,
+        "prompt": prompt,
+        "stream": False,
+        "options": {
+            "temperature": temperature,
+            "num_predict": max_tokens
+        }
+    }
+    try:
+        response = requests.post(url, json=payload)
+        if response.status_code == 200:
+            return response.json().get("response", "")
+        else:
+            return f"Error: {response.status_code} - {response.text}"
+    except Exception as e:
+        return f"Request failed: {e}"
 
 def jcoder_tab(model="llama3.2", temperature=0.7, max_tokens=512):
     st.write("### 🖥️ JCoder Assistant")
@@ -21,7 +46,7 @@ def jcoder_tab(model="llama3.2", temperature=0.7, max_tokens=512):
         if st.button("Generate Code", key="jcoder_button_gen"):
             if desc.strip():
                 prompt = f"Write {language} code for this request:\n{desc}"
-                code = ollama_prompt(prompt, model=model, temperature=temperature, max_tokens=max_tokens)
+                code = ollama_prompt_ngrok(prompt, model=model, temperature=temperature, max_tokens=max_tokens)
                 st.write("### Generated Code")
                 st.code(code, language=language.lower())
                 st.session_state["last_code"] = code
@@ -32,7 +57,7 @@ def jcoder_tab(model="llama3.2", temperature=0.7, max_tokens=512):
         if st.button("Explain Code", key="jcoder_button_explain"):
             if code_input.strip():
                 prompt = f"Explain this {language} code in simple terms:\n{code_input}"
-                explanation = ollama_prompt(prompt, model=model, temperature=temperature, max_tokens=max_tokens)
+                explanation = ollama_prompt_ngrok(prompt, model=model, temperature=temperature, max_tokens=max_tokens)
                 st.write("### Explanation")
                 st.write(explanation)
                 st.session_state["last_code"] = code_input
@@ -44,7 +69,7 @@ def jcoder_tab(model="llama3.2", temperature=0.7, max_tokens=512):
         if st.button("Adjust Code", key="jcoder_button_adjust"):
             if code_input.strip() and adjustment.strip():
                 prompt = f"Here is some {language} code:\n{code_input}\n\nAdjust it as follows: {adjustment}"
-                new_code = ollama_prompt(prompt, model=model, temperature=temperature, max_tokens=max_tokens)
+                new_code = ollama_prompt_ngrok(prompt, model=model, temperature=temperature, max_tokens=max_tokens)
                 st.write("### Adjusted Code")
                 st.code(new_code, language=language.lower())
                 st.session_state["last_code"] = new_code
@@ -55,7 +80,7 @@ def jcoder_tab(model="llama3.2", temperature=0.7, max_tokens=512):
         if st.button("Analyze Code", key="jcoder_button_analyze"):
             if code_input.strip():
                 prompt = f"Analyze this {language} code for bugs, style issues, and optimizations:\n{code_input}"
-                analysis = ollama_prompt(prompt, model=model, temperature=temperature, max_tokens=max_tokens)
+                analysis = ollama_prompt_ngrok(prompt, model=model, temperature=temperature, max_tokens=max_tokens)
                 st.write("### Analysis")
                 st.write(analysis)
                 st.session_state["last_code"] = code_input
@@ -66,7 +91,7 @@ def jcoder_tab(model="llama3.2", temperature=0.7, max_tokens=512):
         if st.button("Refactor Code", key="jcoder_button_refactor"):
             if code_input.strip():
                 prompt = f"Refactor this {language} code to improve readability, efficiency, and structure:\n{code_input}"
-                refactored = ollama_prompt(prompt, model=model, temperature=temperature, max_tokens=max_tokens)
+                refactored = ollama_prompt_ngrok(prompt, model=model, temperature=temperature, max_tokens=max_tokens)
                 st.write("### Refactored Code")
                 st.code(refactored, language=language.lower())
                 st.session_state["last_code"] = refactored
@@ -92,7 +117,7 @@ def jcoder_tab(model="llama3.2", temperature=0.7, max_tokens=512):
         if st.button("Get OS Guidance", key="jcoder_button_os"):
             if query.strip():
                 prompt = f"Provide {os_choice}-specific instructions for this request:\n{query}"
-                guidance = ollama_prompt(prompt, model=model, temperature=temperature, max_tokens=max_tokens)
+                guidance = ollama_prompt_ngrok(prompt, model=model, temperature=temperature, max_tokens=max_tokens)
                 st.write(f"### {os_choice} Guidance")
                 st.write(guidance)
                 st.session_state["last_code"] = guidance
@@ -107,7 +132,7 @@ User request:
 {followup}
 
 Respond with either an explanation or a modified version of the code, depending on what the user asked."""
-        reply = ollama_prompt(context, model=model, temperature=temperature, max_tokens=max_tokens)
+        reply = ollama_prompt_ngrok(context, model=model, temperature=temperature, max_tokens=max_tokens)
         with st.chat_message("assistant"):
             st.markdown(reply)
         if "```" in reply or reply.strip().startswith(language.lower()):
