@@ -1,10 +1,10 @@
 import streamlit as st
 import requests
 
-# Helper function to query Ollama through ngrok
+# Function to query Ollama through ngrok tunnel
 def query_ollama(prompt, model="llama3"):
-    # Replace this with your actual ngrok URL from the terminal
-    url = "https://abcd1234.ngrok.io/api/generate"
+    # Use your actual ngrok forwarding URL here
+    url = "https://blondish-tanklike-asia.ngrok-free.dev/api/generate"
     payload = {
         "model": model,
         "prompt": prompt,
@@ -20,9 +20,17 @@ def query_ollama(prompt, model="llama3"):
         return f"Request failed: {e}"
 
 # Streamlit UI
-st.title("Doc-Bot (Cloud UI + Local Ollama)")
+st.set_page_config(page_title="Doc-Bot", page_icon="🤖")
+st.title("Doc-Bot (Streamlit Cloud + Local Ollama)")
 
-user_input = st.text_input("Ask Doc-Bot something:")
+st.write("Ask me anything — powered by Ollama running on your machine!")
+
+user_input = st.text_area("Your question:", height=100)
+
 if st.button("Send"):
-    answer = query_ollama(user_input)
-    st.write(answer)
+    if user_input.strip():
+        answer = query_ollama(user_input)
+        st.markdown("### Answer")
+        st.write(answer)
+    else:
+        st.warning("Please enter a question before sending.")
