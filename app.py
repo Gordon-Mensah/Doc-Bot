@@ -9,7 +9,7 @@ from data_tab import data_tab
 # -------------------------------
 def query_ollama(prompt, model="llama3", temperature=0.7, max_tokens=512):
     # IMPORTANT: replace with your actual ngrok forwarding URL
-    url = "https://YOUR-NGROK-URL.ngrok-free.dev/api/generate"
+    url = "https://blondish-tanklike-asia.ngrok-free.dev/api/generate"
     payload = {
         "model": model,
         "prompt": prompt,
@@ -110,7 +110,6 @@ if mode == "Chat":
         temperature=temperature,
         max_tokens=max_tokens,
         use_live_search=use_live_search,
-        query_fn=query_ollama  # pass ngrok/Ollama function
     )
 
 elif mode == "JCoder":
@@ -118,7 +117,6 @@ elif mode == "JCoder":
         model=model,
         temperature=temperature,
         max_tokens=max_tokens,
-        query_fn=query_ollama  # pass ngrok/Ollama function
     )
 
 elif mode == "Data Analyst":
