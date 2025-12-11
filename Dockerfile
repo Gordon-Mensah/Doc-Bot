@@ -1,7 +1,7 @@
 # Base image
 FROM ubuntu:22.04
 
-# Install dependencies
+# Install OS dependencies
 RUN apt-get update && apt-get install -y \
     curl \
     python3 \
@@ -9,10 +9,10 @@ RUN apt-get update && apt-get install -y \
     git \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Ollama
+# Install Ollama (system service)
 RUN curl -fsSL https://ollama.com/install.sh | sh
 
-# Pre-pull models so they’re ready
+# Pre-pull models so they're ready when the container starts
 RUN ollama pull llama3
 RUN ollama pull llama3.2
 RUN ollama pull mistral
@@ -20,16 +20,18 @@ RUN ollama pull qwen2
 RUN ollama pull gemma
 
 # Install Python dependencies
-COPY requirements.txt /app/requirements.txt
 WORKDIR /app
-RUN pip3 install -r requirements.txt
+COPY requirements.txt /app/requirements.txt
+RUN pip3 install --no-cache-dir -r requirements.txt
 
-# Copy app code
+# Copy application code
 COPY . /app
 
-# Expose ports
+# Expose ports:
+# - 11434 for Ollama (internal)
+# - 10000 for Streamlit (Render will map $PORT)
 EXPOSE 11434
 EXPOSE 10000
 
-# Start Ollama in background and Streamlit in foreground
+# Start Ollama in the background, then run Streamlit on $PORT
 CMD ollama serve & streamlit run app.py --server.port=$PORT --server.headless=true
