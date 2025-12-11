@@ -23,12 +23,12 @@ COPY . /app
 EXPOSE 11434
 EXPOSE 10000
 
-# Start Ollama in background, wait a moment, then run Streamlit
+# Start Ollama, pull models, then run Streamlit
 CMD ollama serve & \
     sleep 5 && \
-    ollama pull llama3 && \
-    ollama pull llama3.2 && \
-    ollama pull mistral && \
-    ollama pull qwen2 && \
-    ollama pull gemma && \
+    ollama pull llama3 || true && \
+    ollama pull llama3.2 || true && \
+    ollama pull mistral || true && \
+    ollama pull qwen2 || true && \
+    ollama pull gemma || true && \
     streamlit run app.py --server.port=$PORT --server.headless=true
