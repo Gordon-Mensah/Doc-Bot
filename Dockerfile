@@ -12,8 +12,12 @@ RUN apt-get update && apt-get install -y \
 # Install Ollama
 RUN curl -fsSL https://ollama.com/install.sh | sh
 
-# Pre-pull the model so it's ready
+# Pre-pull models so they’re ready
 RUN ollama pull llama3
+RUN ollama pull llama3.2
+RUN ollama pull mistral
+RUN ollama pull qwen2
+RUN ollama pull gemma
 
 # Install Python dependencies
 COPY requirements.txt /app/requirements.txt
