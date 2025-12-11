@@ -1,7 +1,32 @@
 import streamlit as st
+import requests
 from chat_tab import chat_tab
 from jcoder_tab import jcoder_tab
 from data_tab import data_tab
+
+# -------------------------------
+# Ollama via ngrok helper
+# -------------------------------
+def query_ollama(prompt, model="llama3", temperature=0.7, max_tokens=512):
+    # IMPORTANT: replace with your actual ngrok forwarding URL
+    url = "https://YOUR-NGROK-URL.ngrok-free.dev/api/generate"
+    payload = {
+        "model": model,
+        "prompt": prompt,
+        "stream": False,
+        "options": {
+            "temperature": temperature,
+            "num_predict": max_tokens
+        }
+    }
+    try:
+        response = requests.post(url, json=payload)
+        if response.status_code == 200:
+            return response.json().get("response", "")
+        else:
+            return f"Error: {response.status_code} - {response.text}"
+    except Exception as e:
+        return f"Request failed: {e}"
 
 # -------------------------------
 # App config
@@ -80,24 +105,23 @@ st.write("A clean, focused assistant for coding, conversation, and data analysis
 # Mode routing
 # -------------------------------
 if mode == "Chat":
-    # Pass model settings and live summary toggle
     chat_tab(
         model=model,
         temperature=temperature,
         max_tokens=max_tokens,
-        use_live_search=use_live_search
+        use_live_search=use_live_search,
+        query_fn=query_ollama  # pass ngrok/Ollama function
     )
 
 elif mode == "JCoder":
-    # Pass model settings to JCoder
     jcoder_tab(
         model=model,
         temperature=temperature,
-        max_tokens=max_tokens
+        max_tokens=max_tokens,
+        query_fn=query_ollama  # pass ngrok/Ollama function
     )
 
 elif mode == "Data Analyst":
-    # Data tab is local-only for now; can be wired to the model later
     data_tab()
 
 # -------------------------------
@@ -119,4 +143,4 @@ with col3:
     st.caption("Made with Streamlit + Ollama integration.")
     st.caption("For privacy details, see: https://privacy.microsoft.com/en-us/privacystatement")
     st.caption("© 2024 Fast Local AI")
-    st.caption("All rights reserved.")  
+    st.caption("All rights reserved.")
