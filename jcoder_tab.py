@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 # -------------------------------
 def ollama_prompt_ngrok(prompt, model="llama3", temperature=0.7, max_tokens=512):
     # IMPORTANT: replace with your actual ngrok forwarding URL
-    url = "https://YOUR-NGROK-URL.ngrok-free.dev/api/generate"
+    url = "https://blondish-tanklike-asia.ngrok-free.dev/api/generate"
     payload = {
         "model": model,
         "prompt": prompt,

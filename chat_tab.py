@@ -7,7 +7,7 @@ from helpers import ollama_chat, wikipedia_summary
 # -------------------------------
 def ollama_chat_ngrok(chat_history, model="llama3", temperature=0.7, max_tokens=512):
     # IMPORTANT: replace with your actual ngrok forwarding URL
-    url = "https://YOUR-NGROK-URL.ngrok-free.dev/api/generate"
+    url = "https://blondish-tanklike-asia.ngrok-free.dev/api/generate"
     # Build prompt from chat history
     prompt = "\n".join([f"{role}: {msg}" for role, msg in chat_history])
     payload = {
