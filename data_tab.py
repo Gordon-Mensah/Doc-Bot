@@ -1,7 +1,31 @@
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
-from helpers import ollama_prompt  # make sure this exists in your project
+import requests
+
+# -------------------------------
+# Ollama via ngrok helper
+# -------------------------------
+def ollama_prompt_ngrok(prompt, model="llama3", temperature=0.7, max_tokens=512):
+    # IMPORTANT: replace with your actual ngrok forwarding URL
+    url = "https://blondish-tanklike-asia.ngrok-free.dev/api/generate"
+    payload = {
+        "model": model,
+        "prompt": prompt,
+        "stream": False,
+        "options": {
+            "temperature": temperature,
+            "num_predict": max_tokens
+        }
+    }
+    try:
+        response = requests.post(url, json=payload)
+        if response.status_code == 200:
+            return response.json().get("response", "")
+        else:
+            return f"Error: {response.status_code} - {response.text}"
+    except Exception as e:
+        return f"Request failed: {e}"
 
 def data_tab(model="llama3.2", temperature=0.7, max_tokens=512):
     st.write("### 📊 Data Analyst")
@@ -49,7 +73,7 @@ def data_tab(model="llama3.2", temperature=0.7, max_tokens=512):
             else:
                 st.warning("No numeric columns available for visualization.")
 
-            # Unified follow-up box with Ollama integration
+            # Unified follow-up box with Ollama integration via ngrok
             followup = st.chat_input("Ask a question or describe a change...")
             if followup:
                 # Convert a sample of the DataFrame to CSV string for context
@@ -62,7 +86,7 @@ User request:
 {followup}
 
 Respond with either an explanation or a modified version of the code (e.g. pandas/matplotlib) that answers the question or performs the requested change."""
-                reply = ollama_prompt(context, model=model, temperature=temperature, max_tokens=max_tokens)
+                reply = ollama_prompt_ngrok(context, model=model, temperature=temperature, max_tokens=max_tokens)
                 with st.chat_message("assistant"):
                     st.markdown(reply)
 
