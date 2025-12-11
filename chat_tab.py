@@ -1,5 +1,32 @@
 import streamlit as st
+import requests
 from helpers import ollama_chat, wikipedia_summary
+
+# -------------------------------
+# Ollama via ngrok helper
+# -------------------------------
+def ollama_chat_ngrok(chat_history, model="llama3", temperature=0.7, max_tokens=512):
+    # IMPORTANT: replace with your actual ngrok forwarding URL
+    url = "https://YOUR-NGROK-URL.ngrok-free.dev/api/generate"
+    # Build prompt from chat history
+    prompt = "\n".join([f"{role}: {msg}" for role, msg in chat_history])
+    payload = {
+        "model": model,
+        "prompt": prompt,
+        "stream": False,
+        "options": {
+            "temperature": temperature,
+            "num_predict": max_tokens
+        }
+    }
+    try:
+        response = requests.post(url, json=payload)
+        if response.status_code == 200:
+            return response.json().get("response", "")
+        else:
+            return f"Error: {response.status_code} - {response.text}"
+    except Exception as e:
+        return f"Request failed: {e}"
 
 def chat_tab(model="llama3.2", temperature=0.7, max_tokens=512, use_live_search=True):
     # Initialize chat history
@@ -36,11 +63,13 @@ def chat_tab(model="llama3.2", temperature=0.7, max_tokens=512, use_live_search=
             if live_info and "No summary" not in live_info and "Failed" not in live_info:
                 reply = f"📖 Wikipedia says:\n\n{live_info}\n\n(Always verify with trusted sources for the most current data.)"
             else:
-                reply = ollama_chat(st.session_state.chat_history, model=model,
-                                    temperature=temperature, max_tokens=max_tokens)
+                # Call Ollama via ngrok
+                reply = ollama_chat_ngrok(st.session_state.chat_history, model=model,
+                                          temperature=temperature, max_tokens=max_tokens)
         else:
-            reply = ollama_chat(st.session_state.chat_history, model=model,
-                                temperature=temperature, max_tokens=max_tokens)
+            # Call Ollama via ngrok
+            reply = ollama_chat_ngrok(st.session_state.chat_history, model=model,
+                                      temperature=temperature, max_tokens=max_tokens)
 
         # Save and display assistant reply
         st.session_state.chat_history.append(("assistant", reply))
