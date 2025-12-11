@@ -5,11 +5,11 @@ from jcoder_tab import jcoder_tab
 from data_tab import data_tab
 
 # -------------------------------
-# Ollama via ngrok helper
+# Ollama helper (no ngrok)
 # -------------------------------
 def query_ollama(prompt, model="llama3", temperature=0.7, max_tokens=512):
-    # IMPORTANT: replace with your actual ngrok forwarding URL
-    url = "https://blondish-tanklike-asia.ngrok-free.dev/api/generate"
+    # Ollama runs locally inside the Render container
+    url = "http://localhost:11434/api/generate"
     payload = {
         "model": model,
         "prompt": prompt,
@@ -20,7 +20,7 @@ def query_ollama(prompt, model="llama3", temperature=0.7, max_tokens=512):
         }
     }
     try:
-        response = requests.post(url, json=payload)
+        response = requests.post(url, json=payload, headers={"Content-Type": "application/json"})
         if response.status_code == 200:
             return response.json().get("response", "")
         else:

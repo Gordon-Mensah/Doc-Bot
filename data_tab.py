@@ -4,11 +4,11 @@ import matplotlib.pyplot as plt
 import requests
 
 # -------------------------------
-# Ollama via ngrok helper
+# Ollama helper (no ngrok)
 # -------------------------------
-def ollama_prompt_ngrok(prompt, model="llama3", temperature=0.7, max_tokens=512):
-    # IMPORTANT: replace with your actual ngrok forwarding URL
-    url = "https://blondish-tanklike-asia.ngrok-free.dev/api/generate"
+def ollama_prompt_local(prompt, model="llama3", temperature=0.7, max_tokens=512):
+    # Ollama runs locally inside the Render container
+    url = "http://localhost:11434/api/generate"
     payload = {
         "model": model,
         "prompt": prompt,
@@ -19,7 +19,7 @@ def ollama_prompt_ngrok(prompt, model="llama3", temperature=0.7, max_tokens=512)
         }
     }
     try:
-        response = requests.post(url, json=payload)
+        response = requests.post(url, json=payload, headers={"Content-Type": "application/json"})
         if response.status_code == 200:
             return response.json().get("response", "")
         else:
@@ -73,7 +73,7 @@ def data_tab(model="llama3.2", temperature=0.7, max_tokens=512):
             else:
                 st.warning("No numeric columns available for visualization.")
 
-            # Unified follow-up box with Ollama integration via ngrok
+            # Unified follow-up box with Ollama integration (local)
             followup = st.chat_input("Ask a question or describe a change...")
             if followup:
                 # Convert a sample of the DataFrame to CSV string for context
@@ -86,7 +86,7 @@ User request:
 {followup}
 
 Respond with either an explanation or a modified version of the code (e.g. pandas/matplotlib) that answers the question or performs the requested change."""
-                reply = ollama_prompt_ngrok(context, model=model, temperature=temperature, max_tokens=max_tokens)
+                reply = ollama_prompt_local(context, model=model, temperature=temperature, max_tokens=max_tokens)
                 with st.chat_message("assistant"):
                     st.markdown(reply)
 
