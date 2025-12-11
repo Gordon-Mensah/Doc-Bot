@@ -1,1 +1,1 @@
-# fast-local-ai
+# doc-bot
